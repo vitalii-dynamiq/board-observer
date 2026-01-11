@@ -92,17 +92,28 @@ export async function endMeeting(id: string): Promise<Meeting> {
 export interface CreateAttendeeData {
   name: string;
   email?: string;
-  role: string;
-  organization?: string;
+  role: string;            // Maps to 'title' in backend
+  organization?: string;   // Maps to 'department' in backend
+  organizationId?: string; // Required for multi-tenancy
 }
 
-export async function getAttendees(search?: string): Promise<Attendee[]> {
-  const query = search ? `?search=${encodeURIComponent(search)}` : '';
-  return apiGet<Attendee[]>(`/api/attendees${query}`);
+export async function getAttendees(search?: string, organizationId?: string): Promise<Attendee[]> {
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (organizationId) params.set('organizationId', organizationId);
+  const query = params.toString();
+  return apiGet<Attendee[]>(`/api/attendees${query ? `?${query}` : ''}`);
 }
 
 export async function createAttendee(data: CreateAttendeeData): Promise<Attendee> {
-  return apiPost<Attendee>('/api/attendees', data);
+  // Map frontend field names to backend field names
+  return apiPost<Attendee>('/api/attendees', {
+    name: data.name,
+    email: data.email,
+    title: data.role,              // role -> title
+    department: data.organization,  // organization -> department
+    organizationId: data.organizationId,
+  });
 }
 
 export async function addAttendeeToMeeting(

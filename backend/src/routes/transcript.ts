@@ -30,7 +30,7 @@ router.get('/:id/transcript', async (req, res, next) => {
           select: {
             id: true,
             name: true,
-            role: true,
+            title: true,
           },
         },
         agendaItem: {
@@ -74,7 +74,7 @@ router.post('/:id/transcript', async (req, res, next) => {
           select: {
             id: true,
             name: true,
-            role: true,
+            title: true,
           },
         },
         agendaItem: {
@@ -117,7 +117,7 @@ router.put('/:id/transcript/:entryId', async (req, res, next) => {
           select: {
             id: true,
             name: true,
-            role: true,
+            title: true,
           },
         },
         agendaItem: {

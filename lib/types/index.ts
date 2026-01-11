@@ -63,10 +63,10 @@ export interface Meeting {
 export interface Attendee {
   id: string;
   name: string;
-  title: string;       // Job title
-  department?: string;
-  role?: string;       // Deprecated, use title
-  organization?: string; // Deprecated, use department
+  title?: string;       // Job title (from database)
+  role?: string;        // Legacy alias for title
+  department?: string;  // Department name
+  organization?: string; // Legacy alias for department
   avatar?: string;
   isPresent?: boolean;
   isSpeaking?: boolean;

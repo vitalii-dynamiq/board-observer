@@ -139,8 +139,8 @@ function AttendeeItem({ attendee, showStatus = false, canRemove, canToggle, onRe
           {attendee.name}
         </p>
         <p className="text-xs text-gray-500 truncate">
-          {attendee.role}
-          {attendee.organization && ` • ${attendee.organization}`}
+          {attendee.title || attendee.role}
+          {(attendee.department || attendee.organization) && ` • ${attendee.department || attendee.organization}`}
         </p>
       </div>
 

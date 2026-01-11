@@ -22,9 +22,10 @@ vi.mock('next/navigation', () => ({
 
 // Mock Next.js link
 vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({ children, href }: { children: unknown; href: string }) => {
+    // Return a mock anchor element
+    return { type: 'a', props: { href, children } };
+  },
 }));
 
 // Mock SWR
