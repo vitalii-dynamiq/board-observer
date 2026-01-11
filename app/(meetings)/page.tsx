@@ -269,7 +269,7 @@ function LiveMeetingCard({ meeting }: { meeting: Meeting }) {
             <Users className="h-4 w-4 text-gray-400" />
             {meeting.attendees.filter(a => a.isPresent).length}/{meeting.attendees.length} present
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5" suppressHydrationWarning>
             <Clock className="h-4 w-4 text-gray-400" />
             Started {formatTime(meeting.actualStart || meeting.scheduledStart)}
           </span>
@@ -331,7 +331,7 @@ function MeetingCard({ meeting, compact = false, style }: MeetingCardProps) {
                 <Calendar className="h-3.5 w-3.5 text-gray-400" />
                 {formatDate(meeting.scheduledStart)}
               </p>
-              <p className="flex items-center gap-1.5">
+              <p className="flex items-center gap-1.5" suppressHydrationWarning>
                 <Clock className="h-3.5 w-3.5 text-gray-400" />
                 {formatTime(meeting.scheduledStart)} - {formatTime(meeting.scheduledEnd)}
                 <span className="text-gray-400">

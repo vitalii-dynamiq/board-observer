@@ -258,7 +258,7 @@ function MeetingCard({ meeting, isActive }: MeetingCardProps) {
               </span>
             )}
             <span className={isActive ? "text-gray-400" : "text-gray-400"}>•</span>
-            <span className={isActive ? "text-gray-300" : "text-gray-500"}>
+            <span className={isActive ? "text-gray-300" : "text-gray-500"} suppressHydrationWarning>
               {formatTime(meeting.scheduledStart)}
             </span>
           </div>

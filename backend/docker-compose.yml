@@ -1,23 +1,32 @@
 # Board Observer - PostgreSQL Database
+# Isolated setup to avoid conflicts with other apps
 # Usage: docker compose up -d
 
 services:
   db:
     image: postgres:15-alpine
-    container_name: board-observer-db
+    container_name: board-observer-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: board_observer
     ports:
-      - "5432:5432"
+      - "5480:5432"  # Use 5480 externally to avoid conflicts
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - board_observer_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - board-observer-network
+
+networks:
+  board-observer-network:
+    name: board-observer-net
+    driver: bridge
 
 volumes:
-  postgres_data:
+  board_observer_postgres_data:
+    name: board_observer_postgres_data
