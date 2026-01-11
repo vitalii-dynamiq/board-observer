@@ -1,0 +1,58 @@
+{
+  "$schema": "https://cursor.sh/schemas/settings.json",
+  "project": {
+    "name": "board-observer",
+    "description": "AI-powered meeting intelligence platform for enterprise board governance",
+    "type": "fullstack"
+  },
+  "agent": {
+    "enabled": true,
+    "autonomousMode": true,
+    "permissions": {
+      "readFiles": true,
+      "writeFiles": true,
+      "executeCommands": true,
+      "gitOperations": true,
+      "networkAccess": true
+    },
+    "safeguards": {
+      "requireApprovalForDestructive": true,
+      "maxFilesPerOperation": 50,
+      "excludePaths": [
+        "node_modules",
+        ".git",
+        "dist",
+        ".next",
+        "*.log"
+      ]
+    }
+  },
+  "development": {
+    "ports": {
+      "frontend": 4280,
+      "backend": 4281,
+      "database": 5481,
+      "redis": 6381
+    },
+    "startup": {
+      "command": "make setup && make dev",
+      "healthCheck": {
+        "frontend": "http://localhost:4280",
+        "backend": "http://localhost:4281/health"
+      }
+    }
+  },
+  "testing": {
+    "commands": {
+      "unit": "npm test && cd backend && npm test",
+      "lint": "make lint",
+      "typecheck": "npx tsc --noEmit && cd backend && npx tsc --noEmit",
+      "e2e": "npm run test:e2e"
+    },
+    "runBeforeCommit": ["lint", "typecheck"]
+  },
+  "docker": {
+    "composeFile": "docker-compose.yml",
+    "services": ["db", "redis", "backend", "frontend"]
+  }
+}

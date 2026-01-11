@@ -5,6 +5,48 @@
 
 ---
 
+## Cursor Cloud Agent Configuration
+
+This project is configured for autonomous Cursor Cloud Agent development. The agent can:
+- Set up the development environment automatically
+- Run tests and verify changes
+- Make code changes and push to GitHub
+
+### Quick Start for Agents
+
+```bash
+# Complete setup from scratch
+make agent-setup
+
+# Start development servers  
+make agent-start
+
+# Run tests before committing
+make agent-test
+
+# Verify everything works
+make agent-verify
+
+# Stop all services
+make agent-stop
+```
+
+### Agent Configuration Files
+
+- `.cursor/settings.json` - Agent settings and permissions
+- `.cursor/environment.json` - Environment configuration
+- `.cursor/tasks.json` - Predefined tasks
+- `scripts/agent-setup.sh` - Setup automation script
+
+### Important Notes for Agents
+
+1. **Always run `make agent-test` before committing changes**
+2. **Use `make agent-verify` to check if the app is working**
+3. **The app uses non-standard ports** (4280, 4281, 5481) to avoid conflicts
+4. **AI features are mocked by default** (`AI_MOCK_ENABLED=true`)
+
+---
+
 ## Project Configuration
 
 ### Non-Standard Ports (to avoid conflicts)

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://cursor.sh/schemas/environment.json",
+  "name": "board-observer-dev",
+  "description": "Development environment for Board Observer",
+  "runtime": {
+    "node": "20",
+    "npm": "10"
+  },
+  "services": {
+    "postgresql": {
+      "image": "postgres:15-alpine",
+      "port": 5481,
+      "environment": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "postgres",
+        "POSTGRES_DB": "board_observer"
+      }
+    },
+    "redis": {
+      "image": "redis:7-alpine",
+      "port": 6381
+    }
+  },
+  "environment": {
+    "shared": {
+      "NODE_ENV": "development",
+      "TZ": "UTC"
+    },
+    "frontend": {
+      "PORT": "4280",
+      "NEXT_PUBLIC_API_URL": "http://localhost:4281"
+    },
+    "backend": {
+      "PORT": "4281",
+      "DATABASE_URL": "postgresql://postgres:postgres@localhost:5481/board_observer?schema=public",
+      "REDIS_URL": "redis://localhost:6381",
+      "FRONTEND_URL": "http://localhost:4280",
+      "AI_MOCK_ENABLED": "true",
+      "LOG_LEVEL": "debug"
+    }
+  },
+  "setup": {
+    "steps": [
+      {
+        "name": "Install dependencies",
+        "command": "npm ci && cd backend && npm ci"
+      },
+      {
+        "name": "Generate Prisma client",
+        "command": "cd backend && npx prisma generate"
+      },
+      {
+        "name": "Start database",
+        "command": "cd backend && docker compose up -d",
+        "waitFor": {
+          "type": "port",
+          "port": 5481,
+          "timeout": 30
+        }
+      },
+      {
+        "name": "Setup database schema",
+        "command": "cd backend && npx prisma db push"
+      },
+      {
+        "name": "Seed database",
+        "command": "cd backend && npm run db:seed"
+      }
+    ]
+  },
+  "healthChecks": [
+    {
+      "name": "Database",
+      "type": "tcp",
+      "host": "localhost",
+      "port": 5481
+    },
+    {
+      "name": "Backend API",
+      "type": "http",
+      "url": "http://localhost:4281/health",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Frontend",
+      "type": "http",
+      "url": "http://localhost:4280",
+      "expectedStatus": 200
+    }
+  ]
+}

