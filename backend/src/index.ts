@@ -12,6 +12,7 @@ import { apiRateLimit, webhookRateLimit, aiRateLimit } from './middleware/rate-l
 import { auditLog } from './middleware/audit-log';
 
 // Routes
+import organizationsRouter from './routes/organizations';
 import meetingsRouter from './routes/meetings';
 import attendeesRouter from './routes/attendees';
 import agendaRouter from './routes/agenda';
@@ -91,6 +92,7 @@ app.get('/health', (req, res) => {
 app.use('/webhooks', webhookRateLimit, webhooksRouter);
 
 // API Routes with standard rate limiting
+app.use('/api/organizations', apiRateLimit, organizationsRouter);
 app.use('/api/meetings', apiRateLimit, meetingsRouter);
 app.use('/api/attendees', attendeesRouter);
 app.use('/api/meetings', agendaRouter);      // /api/meetings/:id/agenda

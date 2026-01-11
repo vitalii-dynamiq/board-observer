@@ -8,6 +8,9 @@ import useSWR, { mutate } from 'swr';
 import {
   getMeetings,
   getMeeting,
+  getOrganizations,
+  getOrganization,
+  getOrganizationStats,
   getAttendees,
   getAgendaItems,
   getDocuments,
@@ -19,7 +22,7 @@ import {
   getDetectedActions,
   getDetectedDecisions,
 } from '../api/meetings';
-import type { Meeting, Attendee, AgendaItem, ActionItem, Decision } from '../types';
+import type { Meeting, Attendee, AgendaItem, ActionItem, Decision, Organization, OrganizationStats } from '../types';
 
 // SWR options for different data types
 const defaultOptions = {
@@ -33,10 +36,62 @@ const liveOptions = {
 };
 
 // ============================================
+// ORGANIZATIONS
+// ============================================
+
+export function useOrganizations() {
+  const { data, error, isLoading, mutate: mutateOrgs } = useSWR<Organization[]>(
+    'organizations',
+    () => getOrganizations(),
+    defaultOptions
+  );
+
+  return {
+    organizations: data || [],
+    isLoading,
+    isError: error,
+    mutate: mutateOrgs,
+  };
+}
+
+export function useOrganization(slug: string | null) {
+  const { data, error, isLoading } = useSWR<Organization>(
+    slug ? ['organization', slug] : null,
+    () => getOrganization(slug!),
+    defaultOptions
+  );
+
+  return {
+    organization: data,
+    isLoading,
+    isError: error,
+  };
+}
+
+export function useOrganizationStats(slug: string | null) {
+  const { data, error, isLoading } = useSWR<OrganizationStats>(
+    slug ? ['organization-stats', slug] : null,
+    () => getOrganizationStats(slug!),
+    defaultOptions
+  );
+
+  return {
+    stats: data,
+    isLoading,
+    isError: error,
+  };
+}
+
+// ============================================
 // MEETINGS
 // ============================================
 
-export function useMeetings(filter?: { phase?: string; type?: string }) {
+export function useMeetings(filter?: { 
+  phase?: string; 
+  type?: string; 
+  organizationSlug?: string;
+  organizationId?: string;
+}) {
   const key = filter ? ['meetings', filter] : 'meetings';
   const { data, error, isLoading, mutate: mutateMeetings } = useSWR<Meeting[]>(
     key,

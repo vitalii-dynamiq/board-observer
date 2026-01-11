@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { 
+  Building2,
   Calendar,
   CheckCircle2,
   ChevronRight,
@@ -17,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
 import { MeetingForm } from "@/components/forms/meeting-form";
 import { cn } from "@/lib/utils";
-import { useMeetings } from "@/lib/hooks/use-meetings";
+import { useMeetings, useOrganization } from "@/lib/hooks/use-meetings";
 import type { Meeting } from "@/lib/types";
 
 function formatDate(date: Date | string): string {
@@ -78,8 +80,18 @@ const typeLabels: Record<Meeting["type"], string> = {
 };
 
 export default function MeetingsPage() {
+  const searchParams = useSearchParams();
+  const orgSlug = searchParams.get("org");
+  
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const { meetings, isLoading, isError, mutate } = useMeetings();
+  
+  // Get current organization name for display
+  const { organization } = useOrganization(orgSlug);
+  
+  // Fetch meetings filtered by organization if selected
+  const { meetings, isLoading, isError, mutate } = useMeetings(
+    orgSlug ? { organizationSlug: orgSlug } : undefined
+  );
 
   const liveMeetings = meetings.filter((m) => m.phase === "live");
   const upcomingMeetings = meetings.filter((m) => m.phase === "upcoming");
@@ -89,12 +101,18 @@ export default function MeetingsPage() {
     setShowCreateForm(false);
     mutate();
   };
+  
+  // Page title changes based on organization filter
+  const pageTitle = organization ? organization.name : "All Meetings";
+  const pageDescription = organization 
+    ? `Board meetings and committees for ${organization.name}`
+    : "Prepare, participate, and follow up on board meetings across all organizations";
 
   return (
     <PageContainer>
       <PageHeader
-        title="Meetings"
-        description="Prepare, participate, and follow up on board meetings"
+        title={pageTitle}
+        description={pageDescription}
         actions={
           <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
             <Plus className="h-4 w-4" />

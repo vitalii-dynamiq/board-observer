@@ -1,6 +1,32 @@
 // Meeting-centric type definitions for Board Observer
 
 // ============================================
+// Multi-Tenancy Types
+// ============================================
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  industry?: string;
+  country?: string;
+  timezone?: string;
+  _count?: {
+    meetings: number;
+    attendees: number;
+  };
+}
+
+export interface OrganizationStats {
+  totalMeetings: number;
+  liveMeetings: number;
+  upcomingMeetings: number;
+  completedMeetings: number;
+  totalAttendees: number;
+}
+
+// ============================================
 // Meeting Types
 // ============================================
 
@@ -18,6 +44,9 @@ export interface Meeting {
   actualEnd?: Date;
   location?: string;
   isVirtual: boolean;
+  meetingUrl?: string;  // External meeting link (Zoom, Meet, Teams)
+  organization?: Organization;
+  organizationId?: string;
   attendees: Attendee[];
   agenda: AgendaItem[];
   prepQuestions?: PrepQuestion[];
@@ -34,11 +63,14 @@ export interface Meeting {
 export interface Attendee {
   id: string;
   name: string;
-  role: string;
-  organization?: string;
+  title: string;       // Job title
+  department?: string;
+  role?: string;       // Deprecated, use title
+  organization?: string; // Deprecated, use department
   avatar?: string;
   isPresent?: boolean;
   isSpeaking?: boolean;
+  isExternal?: boolean;
 }
 
 // ============================================

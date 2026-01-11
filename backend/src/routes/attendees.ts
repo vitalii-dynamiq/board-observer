@@ -8,9 +8,11 @@ const router = Router();
 const createAttendeeSchema = z.object({
   name: z.string().min(1),
   email: z.string().email().optional(),
-  role: z.string().min(1),
-  organization: z.string().optional(),
+  title: z.string().min(1),
+  department: z.string().optional(),
+  organizationId: z.string().uuid(),
   avatar: z.string().url().optional(),
+  isExternal: z.boolean().default(false),
 });
 
 const updateAttendeeSchema = createAttendeeSchema.partial();
@@ -18,20 +20,38 @@ const updateAttendeeSchema = createAttendeeSchema.partial();
 // GET /api/attendees - List all attendees
 router.get('/', async (req, res, next) => {
   try {
-    const { search, limit = '100', offset = '0' } = req.query;
+    const { search, organizationId, organizationSlug, limit = '100', offset = '0' } = req.query;
 
     const where: any = {};
+    
+    // Filter by organization
+    if (organizationId) {
+      where.organizationId = organizationId;
+    } else if (organizationSlug) {
+      const org = await prisma.organization.findUnique({
+        where: { slug: organizationSlug as string },
+      });
+      if (org) {
+        where.organizationId = org.id;
+      }
+    }
+    
     if (search) {
       where.OR = [
         { name: { contains: search as string, mode: 'insensitive' } },
         { email: { contains: search as string, mode: 'insensitive' } },
-        { role: { contains: search as string, mode: 'insensitive' } },
-        { organization: { contains: search as string, mode: 'insensitive' } },
+        { title: { contains: search as string, mode: 'insensitive' } },
+        { department: { contains: search as string, mode: 'insensitive' } },
       ];
     }
 
     const attendees = await prisma.attendee.findMany({
       where,
+      include: {
+        organization: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
       orderBy: { name: 'asc' },
       take: parseInt(limit as string),
       skip: parseInt(offset as string),

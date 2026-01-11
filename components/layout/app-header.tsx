@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { OrgSwitcher } from "./org-switcher";
 
 interface AppHeaderProps {
   onMenuClick?: () => void;
@@ -37,11 +37,18 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-sm font-semibold tracking-tight text-gray-900">
-                Board Observer
+                Board Ob<span className="tracking-normal">s</span>erver
               </h1>
               <p className="text-xs text-gray-500">Meeting Intelligence</p>
             </div>
           </Link>
+
+          {/* Organization Switcher */}
+          <div className="hidden md:block border-l border-gray-200/80 pl-4 ml-2">
+            <Suspense fallback={<div className="h-9 w-48 animate-pulse rounded-md bg-gray-100" />}>
+              <OrgSwitcher />
+            </Suspense>
+          </div>
         </div>
 
         {/* Right section */}

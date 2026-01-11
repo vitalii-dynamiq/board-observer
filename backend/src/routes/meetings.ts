@@ -12,6 +12,8 @@ const createMeetingSchema = z.object({
   scheduledEnd: z.string().datetime(),
   location: z.string().optional(),
   isVirtual: z.boolean().default(false),
+  organizationId: z.string().uuid().optional(), // For multi-tenant support
+  meetingUrl: z.string().url().optional(), // External meeting link
 });
 
 const updateMeetingSchema = createMeetingSchema.partial().extend({
@@ -22,18 +24,38 @@ const updateMeetingSchema = createMeetingSchema.partial().extend({
   recordingDuration: z.number().optional(),
 });
 
-// GET /api/meetings - List all meetings
+// GET /api/meetings - List all meetings (with optional organization filter)
 router.get('/', async (req, res, next) => {
   try {
-    const { phase, type, limit = '50', offset = '0' } = req.query;
+    const { phase, type, organizationId, organizationSlug, limit = '50', offset = '0' } = req.query;
 
     const where: any = {};
     if (phase) where.phase = phase;
     if (type) where.type = type;
+    
+    // Support filtering by organization ID or slug
+    if (organizationId) {
+      where.organizationId = organizationId;
+    } else if (organizationSlug) {
+      const org = await prisma.organization.findUnique({
+        where: { slug: organizationSlug as string },
+      });
+      if (org) {
+        where.organizationId = org.id;
+      }
+    }
 
     const meetings = await prisma.meeting.findMany({
       where,
       include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logo: true,
+          },
+        },
         attendees: {
           include: {
             attendee: true,
@@ -67,13 +89,15 @@ router.get('/', async (req, res, next) => {
       actualEnd: m.actualEnd,
       location: m.location,
       isVirtual: m.isVirtual,
+      meetingUrl: m.meetingUrl,
       isRecording: m.isRecording,
       recordingDuration: m.recordingDuration,
+      organization: m.organization,
       attendees: m.attendees.map((ma) => ({
         id: ma.attendee.id,
         name: ma.attendee.name,
-        role: ma.attendee.role,
-        organization: ma.attendee.organization,
+        title: ma.attendee.title,
+        department: ma.attendee.department,
         isPresent: ma.isPresent,
         isSpeaking: ma.isSpeaking,
       })),
@@ -156,8 +180,8 @@ router.get('/:id', async (req, res, next) => {
       attendees: meeting.attendees.map((ma) => ({
         id: ma.attendee.id,
         name: ma.attendee.name,
-        role: ma.attendee.role,
-        organization: ma.attendee.organization,
+        title: ma.attendee.title,
+        department: ma.attendee.department,
         avatar: ma.attendee.avatar,
         isPresent: ma.isPresent,
         isSpeaking: ma.isSpeaking,
@@ -208,16 +232,31 @@ router.post('/', async (req, res, next) => {
   try {
     const data = createMeetingSchema.parse(req.body);
 
+    // Get organizationId from body or find first org (for backwards compatibility)
+    let organizationId = data.organizationId;
+    if (!organizationId) {
+      const firstOrg = await prisma.organization.findFirst();
+      if (!firstOrg) {
+        return res.status(400).json({ error: 'No organization found. Please create an organization first.' });
+      }
+      organizationId = firstOrg.id;
+    }
+
     const meeting = await prisma.meeting.create({
       data: {
+        organizationId,
         title: data.title,
         type: data.type,
         scheduledStart: new Date(data.scheduledStart),
         scheduledEnd: new Date(data.scheduledEnd),
         location: data.location,
         isVirtual: data.isVirtual,
+        meetingUrl: data.meetingUrl,
       },
       include: {
+        organization: {
+          select: { id: true, name: true, slug: true },
+        },
         attendees: {
           include: {
             attendee: true,
@@ -366,8 +405,8 @@ router.post('/:id/attendees', async (req, res, next) => {
     res.status(201).json({
       id: meetingAttendee.attendee.id,
       name: meetingAttendee.attendee.name,
-      role: meetingAttendee.attendee.role,
-      organization: meetingAttendee.attendee.organization,
+      title: meetingAttendee.attendee.title,
+      department: meetingAttendee.attendee.department,
       isPresent: meetingAttendee.isPresent,
       isSpeaking: meetingAttendee.isSpeaking,
     });
@@ -402,8 +441,8 @@ router.put('/:id/attendees/:attendeeId', async (req, res, next) => {
     res.json({
       id: meetingAttendee.attendee.id,
       name: meetingAttendee.attendee.name,
-      role: meetingAttendee.attendee.role,
-      organization: meetingAttendee.attendee.organization,
+      title: meetingAttendee.attendee.title,
+      department: meetingAttendee.attendee.department,
       isPresent: meetingAttendee.isPresent,
       isSpeaking: meetingAttendee.isSpeaking,
     });

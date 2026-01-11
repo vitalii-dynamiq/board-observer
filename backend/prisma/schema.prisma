@@ -1,5 +1,6 @@
 // Board Observer - Database Schema
 // PostgreSQL with Prisma ORM
+// Multi-tenant architecture for enterprise/government clients
 
 generator client {
   provider = "prisma-client-js"
@@ -11,11 +12,78 @@ datasource db {
 }
 
 // ============================================
+// MULTI-TENANCY: ORGANIZATIONS & USERS
+// ============================================
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique  // URL-friendly identifier
+  logo        String?           // Logo URL
+  industry    String?           // Government, Postal, Finance, Health, etc.
+  country     String?
+  timezone    String   @default("Asia/Dubai")
+  settings    Json?             // Organization-specific settings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members     OrganizationMember[]
+  meetings    Meeting[]
+  attendees   Attendee[]
+
+  @@index([slug])
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String
+  avatar      String?
+  role        UserRole @default(MEMBER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  organizations OrganizationMember[]
+
+  @@index([email])
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  userId         String
+  organizationId String
+  role           OrgMemberRole @default(VIEWER)
+  joinedAt       DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+enum UserRole {
+  ADMIN     // Can see all organizations
+  MEMBER    // Regular user
+}
+
+enum OrgMemberRole {
+  OWNER     // Full control
+  ADMIN     // Can manage members
+  EDITOR    // Can edit meetings
+  VIEWER    // Read-only
+}
+
+// ============================================
 // CORE ENTITIES
 // ============================================
 
 model Meeting {
   id             String   @id @default(uuid())
+  organizationId String
   title          String
   type           MeetingType
   phase          MeetingPhase @default(UPCOMING)
@@ -25,6 +93,7 @@ model Meeting {
   actualEnd      DateTime?
   location       String?
   isVirtual      Boolean  @default(false)
+  meetingUrl     String?  // External meeting URL (Zoom, Meet, Teams)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -35,6 +104,7 @@ model Meeting {
   transcriptUrl     String?  // URL to the full transcript file
 
   // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   attendees      MeetingAttendee[]
   agendaItems    AgendaItem[]
   documents      BriefingDocument[]
@@ -55,6 +125,7 @@ model Meeting {
   // OpenAI Advisor Agent Insights
   agentInsights     AgentInsight[]
 
+  @@index([organizationId])
   @@index([phase])
   @@index([scheduledStart])
 }
@@ -74,20 +145,25 @@ enum MeetingPhase {
 }
 
 model Attendee {
-  id           String   @id @default(uuid())
-  name         String
-  email        String?  @unique
-  role         String
-  organization String?
-  avatar       String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  email          String?
+  title          String   // Job title
+  department     String?
+  avatar         String?
+  isExternal     Boolean  @default(false)  // External advisor, consultant, etc.
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
-  meetings     MeetingAttendee[]
-  actionItems  ActionItem[]
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  meetings      MeetingAttendee[]
+  actionItems   ActionItem[]
   transcriptEntries TranscriptEntry[]
 
+  @@unique([organizationId, email])
+  @@index([organizationId])
   @@index([email])
 }
 

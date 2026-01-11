@@ -3,7 +3,23 @@
  */
 
 import { apiGet, apiPost, apiPut, apiDelete } from './client';
-import type { Meeting, Attendee, AgendaItem, ActionItem, Decision } from '../types';
+import type { Meeting, Attendee, AgendaItem, ActionItem, Decision, Organization, OrganizationStats } from '../types';
+
+// ============================================
+// ORGANIZATIONS
+// ============================================
+
+export async function getOrganizations(): Promise<Organization[]> {
+  return apiGet<Organization[]>('/api/organizations');
+}
+
+export async function getOrganization(slug: string): Promise<Organization> {
+  return apiGet<Organization>(`/api/organizations/${slug}`);
+}
+
+export async function getOrganizationStats(slug: string): Promise<OrganizationStats> {
+  return apiGet<OrganizationStats>(`/api/organizations/${slug}/stats`);
+}
 
 // ============================================
 // MEETINGS
@@ -16,6 +32,8 @@ export interface CreateMeetingData {
   scheduledEnd: string;
   location?: string;
   isVirtual?: boolean;
+  organizationId?: string;
+  meetingUrl?: string;
 }
 
 export interface UpdateMeetingData extends Partial<CreateMeetingData> {
@@ -25,10 +43,14 @@ export interface UpdateMeetingData extends Partial<CreateMeetingData> {
 export async function getMeetings(params?: {
   phase?: string;
   type?: string;
+  organizationSlug?: string;
+  organizationId?: string;
 }): Promise<Meeting[]> {
   const searchParams = new URLSearchParams();
   if (params?.phase) searchParams.set('phase', params.phase);
   if (params?.type) searchParams.set('type', params.type);
+  if (params?.organizationSlug) searchParams.set('organizationSlug', params.organizationSlug);
+  if (params?.organizationId) searchParams.set('organizationId', params.organizationId);
   const query = searchParams.toString();
   return apiGet<Meeting[]>(`/api/meetings${query ? `?${query}` : ''}`);
 }
