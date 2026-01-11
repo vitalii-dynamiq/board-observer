@@ -1,0 +1,52 @@
+---
+description: Frontend development rules and design system
+globs: ["app/**", "components/**", "lib/**", "styles/**"]
+alwaysApply: false
+---
+
+# Frontend Development Rules
+
+## Typography
+- **Primary Font**: IBM Plex Sans for all UI text
+- **Monospace Font**: IBM Plex Mono for code/technical content
+- **NEVER use**: Inter, Roboto, Arial, Geist, or generic sans-serif
+
+## Type Scale
+```
+text-xs    → 12px  — Labels, captions, metadata
+text-sm    → 14px  — Body text, form inputs, buttons
+text-base  → 16px  — Primary body, paragraphs
+text-lg    → 18px  — Section headers
+text-xl    → 20px  — Page section titles
+text-2xl   → 24px  — Page headers
+text-3xl   → 30px  — Hero sections only
+```
+
+## Color Palette (Light Theme Only)
+```css
+gray-50:  '#fafafa'  /* Page background */
+gray-100: '#f4f4f5'  /* Card backgrounds, hover */
+gray-200: '#e4e4e7'  /* Borders, dividers */
+gray-300: '#d4d4d8'  /* Disabled states */
+gray-400: '#a1a1aa'  /* Placeholder text */
+gray-500: '#71717a'  /* Secondary text */
+gray-600: '#52525b'  /* Body text */
+gray-700: '#3f3f46'  /* Primary text */
+gray-800: '#27272a'  /* Headings */
+gray-900: '#18181b'  /* High contrast */
+```
+
+## Component Rules
+- Buttons: `h-9` standard, `h-8` compact, `rounded-md`
+- Cards: `border border-gray-200 bg-white`, `shadow-sm` max
+- Inputs: `h-9 border-gray-200 focus:border-gray-400`
+
+## FORBIDDEN Patterns (AI Slop)
+1. Purple/violet gradients on white backgrounds
+2. Multiple font families in one view
+3. Excessive shadows (shadow-md, shadow-lg, shadow-xl)
+4. Rounded-full buttons for primary actions
+5. Emoji in UI (unless user content)
+6. Colorful icons — stick to monochrome
+7. Hero sections with stock gradients
+8. Glowing effects or neon colors

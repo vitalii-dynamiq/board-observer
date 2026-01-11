@@ -36,7 +36,13 @@ make agent-stop
 - `.cursor/settings.json` - Agent settings and permissions
 - `.cursor/environment.json` - Environment configuration
 - `.cursor/tasks.json` - Predefined tasks
+- `.cursor/rules/` - Project rules (MDC format)
+  - `project-overview.mdc` - Project overview (always applied)
+  - `frontend-rules.mdc` - Frontend design system
+  - `backend-rules.mdc` - Backend conventions
+  - `agent-workflow.mdc` - Agent workflow (always applied)
 - `scripts/agent-setup.sh` - Setup automation script
+- `AGENTS.md` - AI integration documentation (read this first!)
 
 ### Important Notes for Agents
 

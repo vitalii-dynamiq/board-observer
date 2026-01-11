@@ -1,0 +1,36 @@
+---
+description: Board Observer project overview and architecture
+alwaysApply: true
+---
+
+# Board Observer - Project Overview
+
+AI-powered meeting intelligence platform for enterprise board governance.
+
+## Tech Stack
+- **Frontend**: Next.js 14, React 18, Tailwind CSS, ShadCN UI
+- **Backend**: Node.js, Express, Prisma, PostgreSQL
+- **Real-time**: Socket.io, WebSockets
+- **AI Services**: Recall.ai, OpenAI, ElevenLabs (mocked by default)
+
+## Port Configuration (Non-Standard)
+| Service    | Port | Purpose |
+|------------|------|---------|
+| Frontend   | 4280 | Next.js dev server |
+| Backend    | 4281 | Express API |
+| PostgreSQL | 5481 | Database |
+| Redis      | 6381 | Rate limiting |
+
+## Quick Commands
+```bash
+make agent-setup   # Complete setup
+make agent-start   # Start servers
+make agent-test    # Run tests
+make agent-verify  # Verify health
+make agent-stop    # Stop all
+```
+
+## Key Files
+- `AGENTS.md` - AI integration documentation
+- `backend/.env.example` - Backend environment template
+- `.env.example` - Frontend environment template

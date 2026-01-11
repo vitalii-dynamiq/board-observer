@@ -1,0 +1,57 @@
+---
+description: Cursor Cloud Agent workflow and automation rules
+alwaysApply: true
+---
+
+# Cursor Cloud Agent Workflow
+
+## Before Making Changes
+1. Check service status: `make status`
+2. If services not running: `make agent-start`
+3. Understand the change scope
+
+## After Making Changes
+1. Run tests: `make agent-test`
+2. Verify health: `make agent-verify`
+3. If tests pass: commit and push
+
+## Agent Commands
+```bash
+make agent-setup   # Complete setup from scratch
+make agent-start   # Start all services
+make agent-stop    # Stop all services
+make agent-test    # Run lint + typecheck
+make agent-verify  # Verify API health
+```
+
+## Testing Checklist
+- [ ] Frontend linting passes
+- [ ] Frontend TypeScript compiles
+- [ ] Backend linting passes
+- [ ] Backend TypeScript compiles
+- [ ] API endpoints respond correctly
+- [ ] Frontend loads without errors
+
+## Important Notes
+- **Ports are non-standard**: 4280, 4281, 5481, 6381
+- **AI features mocked by default**: `AI_MOCK_ENABLED=true`
+- **Always test before committing**
+- **Use semantic commit messages**
+
+## Commit Message Format
+```
+type(scope): description
+
+feat: new feature
+fix: bug fix
+docs: documentation
+style: formatting
+refactor: code restructure
+test: tests
+chore: maintenance
+```
+
+## Troubleshooting
+- If services won't start, check ports: `lsof -i :4280 -i :4281`
+- If database issues: `cd backend && docker compose down && docker compose up -d`
+- If dependencies missing: `make install`

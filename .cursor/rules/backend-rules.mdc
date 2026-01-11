@@ -1,0 +1,66 @@
+---
+description: Backend development rules and API conventions
+globs: ["backend/**"]
+alwaysApply: false
+---
+
+# Backend Development Rules
+
+## API Structure
+```
+backend/src/
+├── routes/        # Express route handlers
+├── services/      # Business logic
+│   ├── ai/        # AI service integrations
+│   ├── recall/    # Recall.ai integration
+│   ├── openai/    # OpenAI integration
+│   └── elevenlabs/ # ElevenLabs TTS
+├── middleware/    # Express middleware
+├── lib/           # Utilities (prisma, logger)
+└── websocket/     # Socket.io handlers
+```
+
+## Route Handler Pattern
+```typescript
+router.get('/', async (req, res, next) => {
+  try {
+    const data = await prisma.model.findMany();
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+## Validation with Zod
+```typescript
+const schema = z.object({
+  title: z.string().min(1),
+  type: z.enum(['BOARD', 'COMMITTEE', 'REVIEW']),
+});
+```
+
+## Multi-tenancy
+- All entities must have `organizationId`
+- Filter queries: `where: { organizationId }`
+- Admin users can view all organizations
+
+## Database Commands
+```bash
+cd backend && npx prisma db push    # Push schema
+cd backend && npm run db:seed       # Seed data
+cd backend && npx prisma studio     # Visual browser
+```
+
+## WebSocket Events
+```typescript
+// Server → Client
+io.to(meetingId).emit('transcript-update', { ... });
+
+// Client → Server
+socket.on('join-meeting', (meetingId) => { ... });
+```
+
+## AI Mock Mode
+- Set `AI_MOCK_ENABLED=true` for development
+- Set `AI_MOCK_ENABLED=false` for production with real APIs

@@ -2,6 +2,40 @@
 
 This document describes how AI features are implemented in Board Observer and how to integrate real AI services.
 
+---
+
+## 🤖 Cursor Cloud Agent Quick Reference
+
+> **For AI Agents**: Use these commands to work with this project autonomously.
+
+### Setup & Development
+```bash
+make agent-setup   # Complete setup from scratch
+make agent-start   # Start all services
+make agent-stop    # Stop all services
+```
+
+### Testing & Verification
+```bash
+make agent-test    # Run lint + typecheck
+make agent-verify  # Verify API health
+make status        # Check service status
+```
+
+### Key Information
+- **Frontend**: http://localhost:4280
+- **Backend**: http://localhost:4281
+- **Database**: localhost:5481
+- **AI Mock Mode**: `AI_MOCK_ENABLED=true` (default)
+
+### Configuration Files
+- `.cursor/rules/` - Project rules for AI agents
+- `.cursor/settings.json` - Agent settings
+- `.cursor/environment.json` - Environment config
+- `backend/.env.example` - Backend environment template
+
+---
+
 ## Overview
 
 Board Observer uses AI agents for real-time meeting intelligence:
