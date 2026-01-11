@@ -1,0 +1,343 @@
+# Frontend Design System Rules
+
+> Professional, enterprise-grade React + Next.js application using ShadCN, Tailwind, and Radix.
+> Target aesthetic: Clean, minimal, technical, light-themed.
+
+---
+
+## 1. Typography
+
+### Font Stack
+- **Primary**: Use `IBM Plex Sans` (IBM's corporate typeface) for all UI text
+- **Monospace**: Use `IBM Plex Mono` for code/technical content
+- **Style**: Geometric, technical, highly legible
+- **NEVER use**: Inter, Roboto, Arial, Geist, or generic sans-serif
+
+### Installation
+```bash
+npm install @fontsource/ibm-plex-sans @fontsource/ibm-plex-mono
+```
+
+```tsx
+// app/layout.tsx
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans/700.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+```
+
+### Type Scale (use consistently)
+```
+text-xs    → 12px  — Labels, captions, metadata (tracking: 0.02em)
+text-sm    → 14px  — Body text, form inputs, buttons (tracking: 0.01em)
+text-base  → 16px  — Primary body, paragraphs (tracking: 0.01em)
+text-lg    → 18px  — Section headers, emphasis (tracking: -0.01em)
+text-xl    → 20px  — Page section titles (tracking: -0.02em)
+text-2xl   → 24px  — Page headers (tracking: -0.025em)
+text-3xl   → 30px  — Hero sections only (tracking: -0.03em)
+```
+
+### Font Weight Rules
+- `font-normal` (400) — Body text, descriptions
+- `font-medium` (500) — Buttons, labels, navigation, UI elements
+- `font-semibold` (600) — Headings, emphasis
+- `font-bold` (700) — Sparingly, only for critical emphasis
+- **NEVER use**: font-black (900) in UI — too heavy
+
+### Letter Spacing (Geometric Font Optimization)
+- **Headings**: Tighter tracking (-0.02em to -0.03em) for geometric fonts
+- **Body text**: Slightly looser (0.01em) for readability
+- **Labels/UI**: Medium tracking (0.02em) for clarity at small sizes
+- **Monospace**: No additional tracking (0)
+
+---
+
+## 2. Color Palette
+
+### Light Theme Foundation
+Use a refined gray scale. NEVER use pure black (`#000`) or pure white (`#fff`) for backgrounds.
+
+```css
+/* tailwind.config.ts - extend colors */
+gray: {
+  50:  '#fafafa',  /* Page background */
+  100: '#f4f4f5',  /* Card backgrounds, hover states */
+  200: '#e4e4e7',  /* Borders, dividers */
+  300: '#d4d4d8',  /* Disabled states */
+  400: '#a1a1aa',  /* Placeholder text */
+  500: '#71717a',  /* Secondary text */
+  600: '#52525b',  /* Body text */
+  700: '#3f3f46',  /* Primary text */
+  800: '#27272a',  /* Headings */
+  900: '#18181b',  /* High contrast text */
+}
+```
+
+### Accent Colors
+- **Primary**: Single accent color (blue, indigo, or brand color)
+- Keep accent usage minimal — buttons, links, focus rings only
+- Avoid gradients on white backgrounds (AI slop signature)
+
+### Color Usage
+```
+Background:     gray-50 or white
+Surface/Cards:  white with gray-200 border
+Primary text:   gray-800 or gray-900
+Secondary text: gray-500 or gray-600
+Borders:        gray-200 (1px solid)
+Focus rings:    ring-2 ring-offset-2 ring-gray-400
+```
+
+### FORBIDDEN
+- Purple gradients on white backgrounds
+- Rainbow or multi-color gradients
+- Neon or overly saturated accent colors
+- More than 2 accent colors in the entire app
+
+---
+
+## 3. Spacing & Layout
+
+### Spacing Scale (strict adherence)
+```
+0.5  (2px)   → Icon padding, tight gaps
+1    (4px)   → Between related items
+2    (8px)   → Standard small gap
+3    (12px)  → Input padding, card padding
+4    (16px)  → Section padding, component gaps
+6    (24px)  → Card padding, section margins
+8    (32px)  → Page section gaps
+12   (48px)  → Major section separation
+16   (64px)  → Page top/bottom padding
+```
+
+### Layout Principles
+- Max content width: `max-w-6xl` (1152px) or `max-w-7xl` (1280px)
+- Page padding: `px-4 sm:px-6 lg:px-8`
+- Card padding: `p-4` or `p-6` — never `p-5` or odd values
+- Consistent vertical rhythm with `space-y-*` utilities
+
+### Grid System
+```tsx
+// Standard page layout
+<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <div className="space-y-8">
+    {/* content */}
+  </div>
+</div>
+```
+
+---
+
+## 4. Component Patterns
+
+### Buttons
+```tsx
+// Primary
+<Button className="bg-gray-900 text-white hover:bg-gray-800">
+
+// Secondary
+<Button variant="outline" className="border-gray-200 hover:bg-gray-50">
+
+// Ghost
+<Button variant="ghost" className="hover:bg-gray-100">
+```
+
+**Button Rules:**
+- Height: `h-9` (36px) standard, `h-8` (32px) compact
+- Padding: `px-4` standard, `px-3` compact
+- Border radius: `rounded-md` (6px) — NEVER fully rounded (`rounded-full`) for action buttons
+- Text: `text-sm font-medium`
+
+### Cards
+```tsx
+<div className="rounded-lg border border-gray-200 bg-white p-6">
+```
+
+**Card Rules:**
+- Border: Always use `border border-gray-200`
+- Shadow: Minimal or none (`shadow-sm` max) — NEVER `shadow-lg` or `shadow-xl`
+- Border radius: `rounded-lg` (8px)
+- No gradient backgrounds
+
+### Inputs
+```tsx
+<Input className="h-9 border-gray-200 focus:border-gray-400 focus:ring-gray-400" />
+```
+
+**Input Rules:**
+- Height: `h-9` (36px) to match buttons
+- Border: `border-gray-200`, focus: `border-gray-400`
+- Background: `bg-white` or `bg-gray-50`
+- Placeholder: `text-gray-400`
+
+### Tables
+- Header: `bg-gray-50 text-gray-500 text-xs font-medium uppercase tracking-wider`
+- Rows: `border-b border-gray-100` 
+- Hover: `hover:bg-gray-50`
+
+---
+
+## 5. Animation & Interaction
+
+### Transition Defaults
+```tsx
+// Standard transition
+className="transition-colors duration-150"
+
+// Interactive elements
+className="transition-all duration-200 ease-out"
+```
+
+### Animation Rules
+- Duration: 150-200ms for micro-interactions
+- Easing: `ease-out` for enters, `ease-in` for exits
+- Prefer `transform` and `opacity` (GPU-accelerated)
+- No bouncing, no spring animations in UI
+
+### Focus States
+```tsx
+className="focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+```
+
+### Hover States
+- Subtle background change: `hover:bg-gray-50` or `hover:bg-gray-100`
+- Never change multiple properties on hover
+- No scale transforms on buttons or cards
+
+---
+
+## 6. Icons
+
+### Icon Library
+- Use `lucide-react` (already included with shadcn)
+- Icon size: Match text — `size={16}` with `text-sm`, `size={20}` with `text-base`
+- Icon color: `text-gray-400` or `text-gray-500` for decorative, inherit for actionable
+- Stroke width: Keep default (2) — never modify
+
+### Icon + Text Pairing
+```tsx
+<Button>
+  <Icon className="mr-2 h-4 w-4" />
+  Label
+</Button>
+```
+
+---
+
+## 7. Forbidden Patterns (AI Slop)
+
+### NEVER Do This:
+1. **Purple/violet gradients** on white backgrounds
+2. **Multiple font families** in one view
+3. **Excessive shadows** (shadow-md, shadow-lg, shadow-xl on cards)
+4. **Rounded-full buttons** for primary actions
+5. **Emoji in UI** unless explicitly for user content
+6. **Colorful icons** — stick to monochrome
+7. **Hero sections with stock gradients**
+8. **Glowing effects** or neon colors
+9. **Multiple competing accent colors**
+10. **Skeleton loaders with animation** that draws attention
+
+### NEVER Use These Patterns:
+```tsx
+// ❌ BAD - Gradient button
+<button className="bg-gradient-to-r from-purple-500 to-pink-500">
+
+// ❌ BAD - Excessive shadow
+<div className="shadow-xl rounded-2xl">
+
+// ❌ BAD - Pill button for actions
+<button className="rounded-full px-8">
+
+// ❌ BAD - Colorful icons
+<Icon className="text-purple-500" />
+```
+
+### DO This Instead:
+```tsx
+// ✅ GOOD - Solid, minimal button
+<button className="bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium">
+
+// ✅ GOOD - Clean card
+<div className="border border-gray-200 rounded-lg bg-white p-6">
+
+// ✅ GOOD - Subtle icon
+<Icon className="text-gray-400 h-4 w-4" />
+```
+
+---
+
+## 8. Page Structure
+
+### Standard Page Template
+```tsx
+export default function Page() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header/Nav */}
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            {/* nav content */}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          {/* Page header */}
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Page Title</h1>
+            <p className="mt-1 text-sm text-gray-500">Description text</p>
+          </div>
+
+          {/* Content sections */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6">
+            {/* content */}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+
+---
+
+## 9. File Organization
+
+```
+/app
+  /layout.tsx          # Root layout with fonts
+  /page.tsx            # Homepage
+  /(routes)/           # Route groups
+/components
+  /ui/                 # ShadCN components (do not modify heavily)
+  /[feature]/          # Feature-specific components
+/lib
+  /utils.ts            # Utility functions (cn, etc.)
+/styles
+  /globals.css         # Tailwind imports + CSS variables
+```
+
+---
+
+## 10. Quality Checklist
+
+Before shipping any UI:
+
+- [ ] Only gray-50 or white backgrounds used
+- [ ] No shadows larger than shadow-sm
+- [ ] All text uses IBM Plex Sans font family
+- [ ] Headings have tight letter-spacing (-0.02em to -0.03em)
+- [ ] Buttons have consistent height (h-8 or h-9)
+- [ ] Cards have border-gray-200, no gradients
+- [ ] Focus states are visible (ring-2)
+- [ ] Spacing uses standard scale (4, 6, 8, 12, 16)
+- [ ] Icons are gray-400/gray-500, not colorful
+- [ ] No purple gradients anywhere
+- [ ] Typography hierarchy is clear (max 3 sizes per view)

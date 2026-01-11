@@ -1,0 +1,421 @@
+// Board Observer - Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// CORE ENTITIES
+// ============================================
+
+model Meeting {
+  id             String   @id @default(uuid())
+  title          String
+  type           MeetingType
+  phase          MeetingPhase @default(UPCOMING)
+  scheduledStart DateTime
+  scheduledEnd   DateTime
+  actualStart    DateTime?
+  actualEnd      DateTime?
+  location       String?
+  isVirtual      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Recording info
+  isRecording       Boolean  @default(false)
+  recordingDuration Int      @default(0)
+  recordingUrl      String?  // URL to the video recording from Recall.ai
+  transcriptUrl     String?  // URL to the full transcript file
+
+  // Relations
+  attendees      MeetingAttendee[]
+  agendaItems    AgendaItem[]
+  documents      BriefingDocument[]
+  prepQuestions  PrepQuestion[]
+  actionItems    ActionItem[]
+  decisions      Decision[]
+  summary        MeetingSummary?
+  
+  // AI-related (now powered by Recall.ai + OpenAI)
+  transcriptEntries TranscriptEntry[]
+  liveInsights      LiveInsight[]
+  detectedActions   DetectedAction[]
+  detectedDecisions DetectedDecision[]
+  
+  // Recall.ai Bot
+  bot               MeetingBot?
+  
+  // OpenAI Advisor Agent Insights
+  agentInsights     AgentInsight[]
+
+  @@index([phase])
+  @@index([scheduledStart])
+}
+
+enum MeetingType {
+  BOARD
+  COMMITTEE
+  REVIEW
+  STRATEGY
+  OPERATIONS
+}
+
+enum MeetingPhase {
+  UPCOMING
+  LIVE
+  COMPLETED
+}
+
+model Attendee {
+  id           String   @id @default(uuid())
+  name         String
+  email        String?  @unique
+  role         String
+  organization String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  meetings     MeetingAttendee[]
+  actionItems  ActionItem[]
+  transcriptEntries TranscriptEntry[]
+
+  @@index([email])
+}
+
+model MeetingAttendee {
+  id         String   @id @default(uuid())
+  meetingId  String
+  attendeeId String
+  isPresent  Boolean  @default(false)
+  isSpeaking Boolean  @default(false)
+  joinedAt   DateTime?
+  leftAt     DateTime?
+
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  attendee   Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, attendeeId])
+  @@index([meetingId])
+  @@index([attendeeId])
+}
+
+// ============================================
+// PRE-MEETING (PREPARE)
+// ============================================
+
+model AgendaItem {
+  id          String   @id @default(uuid())
+  meetingId   String
+  order       Int
+  title       String
+  description String?
+  duration    Int      // minutes
+  presenter   String?
+  status      AgendaItemStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // AI Analysis (stored as JSON for flexibility)
+  // @AI-INTEGRATION-POINT: This will be populated by AI analysis service
+  aiAnalysis  Json?
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  documents   BriefingDocument[]
+  prepQuestions PrepQuestion[]
+  transcriptEntries TranscriptEntry[]
+  actionItems ActionItem[]
+  discussions DiscussionSummary[]
+
+  @@unique([meetingId, order])
+  @@index([meetingId])
+}
+
+enum AgendaItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+model BriefingDocument {
+  id           String   @id @default(uuid())
+  meetingId    String
+  agendaItemId String?
+  title        String
+  type         DocumentType
+  url          String
+  summary      String?  // @AI-INTEGRATION-POINT: AI-generated summary
+  uploadedAt   DateTime @default(now())
+  fileSize     Int?
+
+  meeting      Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  agendaItem   AgendaItem? @relation(fields: [agendaItemId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+  @@index([agendaItemId])
+}
+
+enum DocumentType {
+  PDF
+  DOC
+  SPREADSHEET
+  PRESENTATION
+  LINK
+}
+
+model PrepQuestion {
+  id           String   @id @default(uuid())
+  meetingId    String
+  agendaItemId String?
+  question     String
+  category     QuestionCategory
+  priority     Priority
+  aiGenerated  Boolean  @default(false)  // @AI-INTEGRATION-POINT
+  answered     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  meeting      Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  agendaItem   AgendaItem? @relation(fields: [agendaItemId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+}
+
+enum QuestionCategory {
+  CLARIFICATION
+  RISK
+  OPPORTUNITY
+  STRATEGIC
+  OPERATIONAL
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// ============================================
+// RECALL.AI BOT (Meeting Recording)
+// ============================================
+
+// Tracks Recall.ai bot instances for meetings
+model MeetingBot {
+  id            String    @id @default(uuid())
+  meetingId     String    @unique
+  recallBotId   String    @unique  // Recall.ai bot ID
+  status        String    // created, joining, waiting_room, in_meeting, left, completed, error
+  joinedAt      DateTime?
+  leftAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Recording info from Recall.ai
+  recordingId   String?   // Recall.ai recording ID
+  recordingUrl  String?   // URL to video recording
+  transcriptUrl String?   // URL to transcript file
+
+  meeting       Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([recallBotId])
+  @@index([status])
+}
+
+// ============================================
+// OPENAI ADVISOR AGENT INSIGHTS
+// ============================================
+
+// Insights generated by the OpenAI Advisor agent during meetings
+model AgentInsight {
+  id            String    @id @default(uuid())
+  meetingId     String
+  type          String    // recommendation, question, risk_alert, context
+  priority      String    // high, medium, low
+  content       String
+  wasSpoken     Boolean   @default(false)  // Whether the agent spoke this aloud
+  confidence    Float     @default(0.8)
+  timestamp     DateTime  @default(now())
+  dismissed     Boolean   @default(false)
+
+  meeting       Meeting   @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([timestamp])
+  @@index([type])
+}
+
+// ============================================
+// IN-MEETING (LIVE) - AI POWERED BY RECALL.AI + OPENAI
+// ============================================
+
+// TranscriptEntry populated by Recall.ai real-time transcription
+model TranscriptEntry {
+  id           String   @id @default(uuid())
+  meetingId    String
+  agendaItemId String?
+  speakerId    String?
+  speakerName  String
+  content      String
+  timestamp    DateTime @default(now())
+  confidence   Float    @default(0.95)
+  
+  // Highlights stored as JSON array
+  highlights   Json?
+
+  meeting      Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  agendaItem   AgendaItem? @relation(fields: [agendaItemId], references: [id], onDelete: SetNull)
+  speaker      Attendee?   @relation(fields: [speakerId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+  @@index([timestamp])
+}
+
+// @AI-INTEGRATION-POINT: LiveInsight will be generated by AI analyst agent
+model LiveInsight {
+  id           String   @id @default(uuid())
+  meetingId    String
+  agendaItemId String?
+  type         InsightType
+  agentId      String   // Which AI agent generated this
+  content      String
+  priority     Priority
+  timestamp    DateTime @default(now())
+  dismissed    Boolean  @default(false)
+
+  meeting      Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@index([timestamp])
+}
+
+enum InsightType {
+  OBSERVATION
+  SUGGESTION
+  ALERT
+  CONTEXT
+}
+
+// @AI-INTEGRATION-POINT: DetectedAction will be generated by AI tracker agent
+model DetectedAction {
+  id                  String   @id @default(uuid())
+  meetingId           String
+  description         String
+  assignee            String?
+  status              DetectionStatus @default(DETECTED)
+  confidence          Float
+  sourceTranscriptId  String?
+  timestamp           DateTime @default(now())
+
+  meeting             Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+}
+
+// @AI-INTEGRATION-POINT: DetectedDecision will be generated by AI tracker agent
+model DetectedDecision {
+  id                  String   @id @default(uuid())
+  meetingId           String
+  description         String
+  status              DetectionStatus @default(DETECTED)
+  confidence          Float
+  sourceTranscriptId  String?
+  timestamp           DateTime @default(now())
+  votedFor            Int?
+  votedAgainst        Int?
+  abstained           Int?
+
+  meeting             Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+}
+
+enum DetectionStatus {
+  DETECTED
+  CONFIRMED
+  REJECTED
+}
+
+// ============================================
+// POST-MEETING
+// ============================================
+
+model ActionItem {
+  id           String   @id @default(uuid())
+  meetingId    String
+  agendaItemId String?
+  description  String
+  assigneeId   String?
+  dueDate      DateTime?
+  priority     Priority
+  status       ActionItemStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  meeting      Meeting     @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  agendaItem   AgendaItem? @relation(fields: [agendaItemId], references: [id], onDelete: SetNull)
+  assignee     Attendee?   @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([meetingId])
+  @@index([assigneeId])
+  @@index([status])
+}
+
+enum ActionItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+model Decision {
+  id          String   @id @default(uuid())
+  meetingId   String
+  description String
+  rationale   String?
+  votedFor    Int      @default(0)
+  votedAgainst Int     @default(0)
+  abstained   Int      @default(0)
+  timestamp   DateTime @default(now())
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+}
+
+// @AI-INTEGRATION-POINT: MeetingSummary will be generated by AI summarization service
+model MeetingSummary {
+  id              String   @id @default(uuid())
+  meetingId       String   @unique
+  overview        String
+  attendanceNotes String?
+  nextSteps       Json     // String array
+  generatedAt     DateTime @default(now())
+
+  meeting         Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  discussions     DiscussionSummary[]
+}
+
+model DiscussionSummary {
+  id            String   @id @default(uuid())
+  summaryId     String
+  agendaItemId  String
+  title         String
+  summary       String
+  keyPoints     Json     // String array
+  outcome       String?
+  duration      Int
+
+  meetingSummary MeetingSummary @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  agendaItem     AgendaItem     @relation(fields: [agendaItemId], references: [id], onDelete: Cascade)
+
+  @@index([summaryId])
+}

@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Enterprise Design System - Global Styles
+ * Typography: IBM Plex Sans (geometric, technical)
+ * Theme: Light, minimal, professional with depth
+ */
+
+@layer base {
+  :root {
+    /* Background & Foreground */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
+
+    /* Card & Popover */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    /* Primary - Dark for light theme */
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+
+    /* Muted */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Accent */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border & Input */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 64%;
+
+    /* Radius */
+    --radius: 6px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* IBM Plex feature settings */
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    letter-spacing: 0.01em;
+  }
+
+  /*
+   * Typography - Optimized for IBM Plex Sans (Geometric)
+   * Tighter tracking on headings, slightly looser on body
+   */
+  h1 {
+    @apply text-2xl font-semibold text-gray-900 leading-tight;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    @apply text-xl font-semibold text-gray-900 leading-snug;
+    letter-spacing: -0.025em;
+  }
+
+  h3 {
+    @apply text-lg font-semibold text-gray-900 leading-snug;
+    letter-spacing: -0.02em;
+  }
+
+  h4 {
+    @apply text-base font-semibold text-gray-900;
+    letter-spacing: -0.015em;
+  }
+
+  h5, h6 {
+    @apply font-semibold text-gray-900;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    @apply text-gray-600 leading-relaxed;
+    letter-spacing: 0.01em;
+  }
+
+  /* Labels and UI text - medium weight for clarity */
+  label, .label {
+    @apply text-sm font-medium text-gray-700;
+    letter-spacing: 0.02em;
+  }
+
+  /* Small/caption text */
+  small, .text-xs {
+    letter-spacing: 0.02em;
+  }
+
+  /* Mono/code text */
+  code, pre, .font-mono {
+    letter-spacing: 0;
+  }
+
+  /* Improved focus states with smooth animation */
+  :focus-visible {
+    @apply outline-none ring-2 ring-gray-400/50 ring-offset-2;
+    transition: box-shadow 150ms ease;
+  }
+
+  /* Remove default focus outline */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-gray-900 text-white;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+@layer components {
+  /* Standard page container with improved spacing */
+  .page-container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  /* Card component with depth */
+  .card {
+    @apply rounded-lg border border-gray-200/80 bg-white p-6;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.03), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+  }
+
+  /* Elevated card with more depth */
+  .card-elevated {
+    @apply rounded-lg border border-gray-200/60 bg-white p-6;
+    box-shadow: 
+      0 1px 3px 0 rgb(0 0 0 / 0.04),
+      0 1px 2px -1px rgb(0 0 0 / 0.04),
+      0 4px 6px -1px rgb(0 0 0 / 0.03);
+  }
+
+  /* Interactive card with hover lift */
+  .card-interactive {
+    @apply rounded-lg border border-gray-200/80 bg-white p-6 cursor-pointer;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.03), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgb(228 228 231 / 1);
+    box-shadow: 
+      0 4px 6px -1px rgb(0 0 0 / 0.05),
+      0 2px 4px -2px rgb(0 0 0 / 0.05),
+      0 10px 15px -3px rgb(0 0 0 / 0.03);
+  }
+
+  /* Glass effect for header/overlays */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .glass-subtle {
+    @apply bg-white/95 backdrop-blur-sm;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Section spacing */
+  .section {
+    @apply space-y-6;
+  }
+
+  /* Subtle divider with fade */
+  .divider {
+    @apply border-t border-gray-100;
+  }
+
+  .divider-fade {
+    @apply h-px;
+    background: linear-gradient(90deg, transparent, rgb(228 228 231 / 0.8), transparent);
+  }
+
+  /* Enhanced input with inner shadow for depth */
+  .input-depth {
+    @apply border-gray-200 bg-gray-50/50;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.04);
+  }
+
+  .input-depth:focus {
+    @apply bg-white border-gray-300;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.02), 0 0 0 3px rgb(161 161 170 / 0.1);
+  }
+}
+
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Subtle text gradient (use sparingly) */
+  .text-gradient {
+    @apply bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent;
+  }
+
+  /* Smooth lift transition */
+  .transition-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Subtle glow on hover */
+  .hover-glow:hover {
+    box-shadow: 0 0 0 3px rgb(161 161 170 / 0.1);
+  }
+
+  /* Animated pulse for live indicators */
+  .pulse-dot {
+    animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Skeleton loading animation */
+  .skeleton {
+    @apply bg-gray-100 rounded;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fade-in 300ms ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale in animation */
+  .animate-scale-in {
+    animation: scale-in 200ms ease-out;
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Subtle background pattern */
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgb(228 228 231 / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(228 228 231 / 0.3) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-dot-pattern {
+    background-image: radial-gradient(rgb(161 161 170 / 0.15) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+}
