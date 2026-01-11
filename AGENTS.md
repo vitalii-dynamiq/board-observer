@@ -60,8 +60,8 @@ The platform supports two modes:
 ```bash
 # backend/.env
 
-# Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/board_observer"
+# Database (port 5481 to avoid conflicts)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5481/board_observer"
 
 # AI Mode: Set to false for production
 AI_MOCK_ENABLED=false

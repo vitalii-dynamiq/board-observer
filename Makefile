@@ -62,16 +62,16 @@ install:
 
 dev:
 	@echo "🚀 Starting development servers..."
-	@echo "Frontend: http://localhost:3000"
-	@echo "Backend:  http://localhost:3001"
+	@echo "Frontend: http://localhost:4280"
+	@echo "Backend:  http://localhost:4281"
 	@echo ""
 	@make -j2 dev-frontend dev-backend
 
 dev-frontend:
-	npm run dev
+	PORT=4280 npm run dev
 
 dev-backend:
-	cd backend && npm run dev
+	cd backend && PORT=4281 npm run dev
 
 # ============================================
 # DATABASE
@@ -82,7 +82,7 @@ db-start:
 	cd backend && docker compose up -d
 	@echo "⏳ Waiting for database to be ready..."
 	@sleep 3
-	@echo "✅ Database is running on port 5432"
+	@echo "✅ Database is running on port 5481"
 
 db-stop:
 	@echo "🛑 Stopping PostgreSQL..."
@@ -143,9 +143,9 @@ docker-up:
 	@sleep 10
 	@echo ""
 	@echo "✅ Services are running:"
-	@echo "   Frontend: http://localhost:3000"
-	@echo "   Backend:  http://localhost:3001"
-	@echo "   Database: localhost:5432"
+	@echo "   Frontend: http://localhost:4280"
+	@echo "   Backend:  http://localhost:4281"
+	@echo "   Database: localhost:5481"
 
 docker-down:
 	@echo "🛑 Stopping Docker services..."

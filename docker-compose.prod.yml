@@ -2,6 +2,11 @@
 # Usage: docker compose -f docker-compose.prod.yml up -d
 #
 # Requires .env.prod file with production values
+#
+# Ports used by Board Observer (to avoid conflicts):
+#   - Frontend:  4280
+#   - Backend:   4281
+#   - Database:  5481 (not exposed in production)
 
 services:
   # PostgreSQL Database
@@ -14,7 +19,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       POSTGRES_DB: ${DB_NAME:-board_observer}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - board_observer_prod_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
@@ -36,7 +41,7 @@ services:
     restart: always
     command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
-      - redis_data:/data
+      - board_observer_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
@@ -60,7 +65,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-board_observer}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      PORT: 3001
+      PORT: 4281
       NODE_ENV: production
       FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required}
       
@@ -82,14 +87,14 @@ services:
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "3001:3001"
+      - "4281:4281"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4281/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -119,13 +124,14 @@ services:
     restart: always
     environment:
       NODE_ENV: production
+      PORT: 4280
     ports:
-      - "3000:3000"
+      - "4280:4280"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4280"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -144,9 +150,9 @@ services:
         max-file: "3"
 
 volumes:
-  postgres_data:
+  board_observer_prod_data:
     driver: local
-  redis_data:
+  board_observer_redis_data:
     driver: local
 
 networks:

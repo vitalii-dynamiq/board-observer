@@ -50,8 +50,8 @@ cd backend && npx prisma db push
 cd backend && npm run db:seed
 
 # Start development servers (in separate terminals)
-npm run dev          # Frontend on http://localhost:3000
-cd backend && npm run dev  # Backend on http://localhost:3001
+PORT=4280 npm run dev              # Frontend on http://localhost:4280
+cd backend && PORT=4281 npm run dev  # Backend on http://localhost:4281
 ```
 
 ### Option 3: Docker Compose (Full Stack)
@@ -73,18 +73,18 @@ cp .env.example .env
 cp backend/.env.example backend/.env
 ```
 
-### Frontend (.env)
+### Frontend (.env.local)
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:4281
 ```
 
 ### Backend (backend/.env)
 
 ```bash
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/board_observer?schema=public"
-PORT=3001
-FRONTEND_URL=http://localhost:3000
+DATABASE_URL="postgresql://postgres:postgres@localhost:5481/board_observer?schema=public"
+PORT=4281
+FRONTEND_URL=http://localhost:4280
 AI_MOCK_ENABLED=true
 ```
 
@@ -176,7 +176,7 @@ See `backend/README.md` for complete API documentation.
 
 ## WebSocket Events
 
-Connect to `ws://localhost:3001` for real-time updates:
+Connect to `ws://localhost:4281` for real-time updates:
 
 - `transcript-update` - New transcript entry
 - `insight-generated` - New AI insight
@@ -255,12 +255,16 @@ cd backend && npx prisma db pull
 
 ### Port Conflicts
 
-Default ports:
-- Frontend: 3000
-- Backend: 3001
-- PostgreSQL: 5432
+Board Observer uses unique ports to avoid conflicts with other projects:
+- Frontend: **4280**
+- Backend: **4281**
+- PostgreSQL: **5481**
 
-To change, update `.env` files and `docker-compose.yml`.
+To change ports, update:
+1. `backend/.env` (DATABASE_URL, PORT, FRONTEND_URL)
+2. `.env.local` (NEXT_PUBLIC_API_URL)
+3. `backend/docker-compose.yml` (db ports)
+4. `docker-compose.yml` (all services)
 
 ### Clean Install
 

@@ -1,5 +1,10 @@
 # Board Observer - Full Stack Docker Compose
 # Usage: docker compose up -d
+#
+# Ports used by Board Observer (to avoid conflicts):
+#   - Frontend:  4280
+#   - Backend:   4281
+#   - Database:  5481
 
 services:
   # PostgreSQL Database
@@ -12,9 +17,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: board_observer
     ports:
-      - "5432:5432"
+      - "5481:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - board_observer_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -32,17 +37,17 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/board_observer?schema=public
-      PORT: 3001
+      PORT: 4281
       NODE_ENV: production
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:4280
       AI_MOCK_ENABLED: "true"
     ports:
-      - "3001:3001"
+      - "4281:4281"
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4281/health"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -55,14 +60,15 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://localhost:3001
+        - NEXT_PUBLIC_API_URL=http://localhost:4281
     container_name: board-observer-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:3001
+      NEXT_PUBLIC_API_URL: http://backend:4281
       NODE_ENV: production
+      PORT: 4280
     ports:
-      - "3000:3000"
+      - "4280:4280"
     depends_on:
       backend:
         condition: service_healthy
@@ -70,7 +76,7 @@ services:
       - board-observer-network
 
 volumes:
-  postgres_data:
+  board_observer_data:
     driver: local
 
 networks:
