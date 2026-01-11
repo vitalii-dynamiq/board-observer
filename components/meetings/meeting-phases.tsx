@@ -29,7 +29,7 @@ export function MeetingPhases({ meetingId, currentPhase }: MeetingPhasesProps) {
   const currentIndex = getCurrentIndex();
 
   return (
-    <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100/80 p-1">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 rounded-lg bg-gray-100/80 p-1">
       {phases.map((phase, index) => {
         const isActive = index === currentIndex;
         const isPast = index < currentIndex;
@@ -47,7 +47,7 @@ export function MeetingPhases({ meetingId, currentPhase }: MeetingPhasesProps) {
             key={phase.id}
             href={isAccessible ? `/${meetingId}/${phase.path}` : "#"}
             className={cn(
-              "flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all",
+              "flex items-center gap-1.5 sm:gap-2 rounded-md px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
               isActive && "bg-white shadow-sm text-gray-900",
               !isActive && isAccessible && "text-gray-500 hover:text-gray-900 hover:bg-white/50",
               !isAccessible && "text-gray-400 cursor-not-allowed opacity-50"
@@ -55,10 +55,11 @@ export function MeetingPhases({ meetingId, currentPhase }: MeetingPhasesProps) {
             onClick={(e) => !isAccessible && e.preventDefault()}
           >
             <Icon className={cn(
-              "h-4 w-4",
+              "h-3.5 w-3.5 sm:h-4 sm:w-4",
               isActive && phase.id === "live" && "text-green-600"
             )} />
-            {phase.label}
+            <span className="hidden xs:inline sm:inline">{phase.label}</span>
+            <span className="xs:hidden">{phase.label.split(' ')[0]}</span>
           </Link>
         );
       })}

@@ -146,73 +146,86 @@ export default function PreparePage({ params }: PreparePageProps) {
     <div className="min-h-full">
       {/* Header */}
       <div className="border-b border-gray-200/80 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          {/* Top row - Back button and actions */}
+          <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Meetings
+              <span className="hidden sm:inline">Back to Meetings</span>
             </Link>
-            <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
-            <div className="flex items-center gap-2">
+            
+            {/* Phase tabs - hidden on mobile, shown inline on desktop */}
+            <div className="hidden md:block">
+              <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
+            </div>
+            
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-8 px-2 sm:px-3"
                 onClick={() => setShowEditForm(true)}
               >
-                <Edit2 className="h-4 w-4 mr-1.5" />
-                Edit
+                <Edit2 className="h-4 w-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">Edit</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={handleDeleteMeeting}
                 disabled={isDeleting}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
               {meeting.phase === "live" && (
-                <Button asChild>
+                <Button asChild size="sm" className="h-8 px-2 sm:px-3">
                   <Link href={`/${params.id}/live`}>
-                    <Play className="h-4 w-4 mr-2" />
-                    Join Meeting
+                    <Play className="h-4 w-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Join Meeting</span>
                   </Link>
                 </Button>
               )}
               {meeting.phase === "upcoming" && (
-                <Button onClick={handleStartMeeting} disabled={isStarting}>
-                  <Play className="h-4 w-4 mr-2" />
-                  {isStarting ? 'Starting...' : 'Start Meeting'}
+                <Button onClick={handleStartMeeting} disabled={isStarting} size="sm" className="h-8 px-2 sm:px-3">
+                  <Play className="h-4 w-4 sm:mr-1.5" />
+                  <span className="hidden xs:inline">{isStarting ? 'Starting...' : 'Start'}</span>
                 </Button>
               )}
             </div>
           </div>
+          
+          {/* Mobile phase tabs */}
+          <div className="md:hidden mb-3 -mx-1 overflow-x-auto scrollbar-hide">
+            <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
+          </div>
 
           {/* Meeting info */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+              <h1 className="text-lg sm:text-2xl font-semibold tracking-tight text-gray-900 line-clamp-2 sm:line-clamp-none">
                 {meeting.title}
               </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  {formatDate(meeting.scheduledStart)}
+              <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                <span className="flex items-center gap-1 sm:gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                  <span className="hidden xs:inline">{formatDate(meeting.scheduledStart)}</span>
+                  <span className="xs:hidden">{new Date(meeting.scheduledStart).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                <span className="flex items-center gap-1 sm:gap-1.5" suppressHydrationWarning>
+                  <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                   {formatTime(meeting.scheduledStart)} - {formatTime(meeting.scheduledEnd)}
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1 sm:gap-1.5">
                   {meeting.isVirtual ? (
-                    <Video className="h-4 w-4 text-gray-400" />
+                    <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                   ) : (
-                    <MapPin className="h-4 w-4 text-gray-400" />
+                    <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                   )}
-                  {meeting.location}
+                  <span className="truncate max-w-[150px] sm:max-w-none">{meeting.location}</span>
                 </span>
               </div>
             </div>

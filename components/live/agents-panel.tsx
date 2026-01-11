@@ -123,7 +123,7 @@ export function AgentsPanel({ agents, expanded = true }: AgentsPanelProps) {
               <p className="text-xs text-gray-400">AI agents will appear when recording starts</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
               {agents.map((agent) => (
                 <AgentCard key={agent.id} agent={agent} />
               ))}

@@ -123,41 +123,44 @@ export default function LivePage({ params }: LivePageProps) {
   const recordingDuration = meeting.recording?.duration || 0;
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-b border-gray-200/80 bg-white/90 backdrop-blur-sm px-4 py-3 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="flex min-h-0 h-full flex-col">
+      {/* Header - Compact on mobile */}
+      <div className="border-b border-gray-200/80 bg-white/90 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-3 flex-shrink-0">
+        {/* Top row - Title and exit */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Exit</span>
             </Link>
             
-            <div className="h-6 w-px bg-gray-200" />
+            <div className="h-5 w-px bg-gray-200 flex-shrink-0 hidden sm:block" />
             
-            <div>
-              <h1 className="text-base font-semibold text-gray-900 truncate max-w-xs sm:max-w-md">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                 {meeting.title}
               </h1>
-              <div className="flex items-center gap-3 text-xs text-gray-500">
+              <div className="flex items-center gap-2 sm:gap-3 text-xs text-gray-500 flex-wrap">
                 {/* Live indicator */}
-                <span className="flex items-center gap-1.5 text-green-600 font-medium">
-                  <span className="relative flex h-2 w-2">
+                <span className="flex items-center gap-1 text-green-600 font-medium">
+                  <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                    <span className="relative inline-flex h-full w-full rounded-full bg-green-500" />
                   </span>
                   Live
                 </span>
                 
-                {/* WebSocket status */}
-                {isConnected ? (
-                  <span className="text-blue-600">Connected</span>
-                ) : (
-                  <span className="text-yellow-600">Connecting...</span>
-                )}
+                {/* WebSocket status - Hidden on very small screens */}
+                <span className="hidden xs:inline">
+                  {isConnected ? (
+                    <span className="text-blue-600">Connected</span>
+                  ) : (
+                    <span className="text-yellow-600">Connecting...</span>
+                  )}
+                </span>
                 
                 {/* Duration */}
                 <span className="flex items-center gap-1">
@@ -165,8 +168,8 @@ export default function LivePage({ params }: LivePageProps) {
                   {duration}
                 </span>
                 
-                {/* Attendees */}
-                <span className="flex items-center gap-1">
+                {/* Attendees - Hidden on mobile */}
+                <span className="hidden sm:flex items-center gap-1">
                   <Users className="h-3 w-3" />
                   {presentCount}/{meeting.attendees?.length || 0}
                 </span>
@@ -174,10 +177,14 @@ export default function LivePage({ params }: LivePageProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
+          {/* Actions - Right side */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Phase tabs - Hidden on mobile */}
+            <div className="hidden lg:block">
+              <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
+            </div>
             
-            <div className="h-6 w-px bg-gray-200 mx-2" />
+            <div className="hidden lg:block h-6 w-px bg-gray-200 mx-1" />
 
             {/* AI Bot Integration */}
             <JoinBotDialog
@@ -185,14 +192,12 @@ export default function LivePage({ params }: LivePageProps) {
               isVirtual={meeting.isVirtual}
               onBotStatusChange={setBotStatus}
             />
-
-            <div className="h-6 w-px bg-gray-200 mx-2" />
             
-            {/* Recording indicator */}
+            {/* Recording indicator - Compact on mobile */}
             {(recordingActive || botStatus?.status === 'in_meeting') && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-1.5">
-                <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-xs font-medium text-red-700">
+              <div className="flex items-center gap-1.5 rounded-md sm:rounded-lg bg-red-50 border border-red-200 px-2 sm:px-3 py-1 sm:py-1.5">
+                <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-xs font-medium text-red-700 hidden sm:inline">
                   {botStatus?.status === 'in_meeting' ? 'AI Active' : 'Recording'}
                 </span>
                 <span className="text-xs text-red-600">{recordingDuration}m</span>
@@ -202,18 +207,18 @@ export default function LivePage({ params }: LivePageProps) {
             <Button 
               variant="outline" 
               size="sm" 
-              className="gap-1.5"
+              className="gap-1 sm:gap-1.5 h-8 px-2 sm:px-3"
               onClick={handleToggleRecording}
             >
               {recordingActive ? (
                 <>
                   <Pause className="h-3.5 w-3.5" />
-                  Pause
+                  <span className="hidden sm:inline">Pause</span>
                 </>
               ) : (
                 <>
                   <Play className="h-3.5 w-3.5" />
-                  Record
+                  <span className="hidden sm:inline">Record</span>
                 </>
               )}
             </Button>
@@ -221,28 +226,33 @@ export default function LivePage({ params }: LivePageProps) {
             <Button 
               variant="destructive" 
               size="sm" 
-              className="gap-1.5"
+              className="gap-1 sm:gap-1.5 h-8 px-2 sm:px-3"
               onClick={handleEndMeeting}
               disabled={isEnding}
             >
               <Phone className="h-3.5 w-3.5" />
-              {isEnding ? 'Ending...' : 'End'}
+              <span className="hidden sm:inline">{isEnding ? 'Ending...' : 'End'}</span>
             </Button>
           </div>
         </div>
+        
+        {/* Mobile phase tabs - Show below header on small screens */}
+        <div className="lg:hidden mt-2 -mx-1 overflow-x-auto scrollbar-hide">
+          <MeetingPhases meetingId={params.id} currentPhase={meeting.phase} />
+        </div>
       </div>
 
-      {/* Main content - 3 column layout */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full grid grid-cols-12 gap-4 p-4">
-          {/* Left column - Transcript */}
-          <div className="col-span-12 lg:col-span-5 xl:col-span-4 h-full overflow-hidden">
+      {/* Main content - Scrollable on mobile, grid on desktop */}
+      <div className="flex-1 overflow-y-auto lg:overflow-hidden">
+        <div className="lg:h-full flex flex-col lg:grid lg:grid-cols-12 gap-4 p-3 sm:p-4">
+          {/* Transcript Panel */}
+          <div className="lg:col-span-5 xl:col-span-4 min-h-[300px] lg:min-h-0 lg:h-full lg:overflow-hidden order-1">
             <TranscriptPanel entries={liveTranscript} />
           </div>
 
-          {/* Middle column - Chat + Insights */}
-          <div className="col-span-12 lg:col-span-4 xl:col-span-5 flex flex-col gap-4 h-full overflow-hidden">
-            <div className="flex-1 min-h-0">
+          {/* Chat + Insights */}
+          <div className="lg:col-span-4 xl:col-span-5 flex flex-col gap-4 min-h-[400px] lg:min-h-0 lg:h-full lg:overflow-hidden order-2">
+            <div className="flex-1 min-h-[250px] lg:min-h-0">
               <ChatAssistant meetingId={params.id} />
             </div>
             <div className="flex-shrink-0">
@@ -253,8 +263,8 @@ export default function LivePage({ params }: LivePageProps) {
             </div>
           </div>
 
-          {/* Right column - Agents + Actions + Attendees */}
-          <div className="col-span-12 lg:col-span-3 space-y-4 overflow-y-auto scrollbar-hide">
+          {/* Agents + Actions + Attendees */}
+          <div className="lg:col-span-3 space-y-4 lg:overflow-y-auto scrollbar-hide order-3">
             <AgentsPanel agents={agents} />
             <ActionDetector 
               actions={liveDetectedActions} 
