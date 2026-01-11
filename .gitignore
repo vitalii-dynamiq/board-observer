@@ -1,58 +1,143 @@
+# ==================================
+# Board Observer - .gitignore
+# ==================================
+
+# ==================================
 # Dependencies
-/node_modules
+# ==================================
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
 
-# Testing
-/coverage
-
+# ==================================
+# Build outputs
+# ==================================
 # Next.js
 /.next/
 /out/
+/build/
 
-# Production
-/build
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env*.local
-.env
-!.env.example
-
-# Vercel
-.vercel
+# Backend
+backend/dist/
 
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# Backend
-backend/node_modules
-backend/dist
+# ==================================
+# Environment files
+# ==================================
+# Local environment files (contain secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 backend/.env
 
-# Database
-*.db
-*.sqlite
+# Allow example files to be committed
+!.env.example
+!backend/.env.example
 
-# IDE
+# ==================================
+# Testing & Coverage
+# ==================================
+/coverage/
+backend/coverage/
+*.lcov
+.nyc_output/
+
+# ==================================
+# IDE & Editor
+# ==================================
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-workspace
+*.sublime-project
+.project
+.classpath
+.settings/
 
+# ==================================
+# OS files
+# ==================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==================================
 # Logs
+# ==================================
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# OS files
-Thumbs.db
+# ==================================
+# Database
+# ==================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==================================
+# Docker
+# ==================================
+# Ignore Docker override files
+docker-compose.override.yml
+
+# ==================================
+# Certificates & Keys
+# ==================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ==================================
+# Runtime data
+# ==================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ==================================
+# Misc
+# ==================================
+# Vercel
+.vercel/
+
+# Turbo
+.turbo/
+
+# Package manager lock files (keep only npm)
+yarn.lock
+pnpm-lock.yaml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Prisma
+backend/prisma/migrations/**/migration_lock.toml

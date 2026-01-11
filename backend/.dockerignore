@@ -1,0 +1,45 @@
+# ==================================
+# Board Observer Backend - Docker Ignore
+# ==================================
+
+# Dependencies (reinstalled in Docker)
+node_modules/
+
+# Build outputs (rebuilt in Docker)
+dist/
+
+# Environment files
+.env
+.env.*
+
+# Tests & Coverage
+__tests__/
+coverage/
+*.test.ts
+*.spec.ts
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+
+# Development configs
+.eslintrc*
+.prettierrc*
+vitest.config.ts
+tsconfig.tsbuildinfo
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Documentation
+*.md

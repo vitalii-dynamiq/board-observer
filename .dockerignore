@@ -1,0 +1,72 @@
+# ==================================
+# Board Observer - Docker Ignore
+# Files/folders to exclude from Docker builds
+# ==================================
+
+# Dependencies (reinstalled in Docker)
+node_modules/
+backend/node_modules/
+
+# Build outputs (rebuilt in Docker)
+.next/
+out/
+build/
+backend/dist/
+
+# Environment files (use Docker env vars)
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Git
+.git/
+.gitignore
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in image)
+*.md
+!README.md
+
+# Tests & Coverage
+__tests__/
+backend/__tests__/
+coverage/
+backend/coverage/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development configs
+.eslintrc*
+.prettierrc*
+tsconfig.tsbuildinfo
+vitest.config.ts
+backend/vitest.config.ts
+
+# Docker files (prevent nested builds)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Makefile
+Makefile
+
+# Logs
+logs/
+*.log
+
+# Misc
+.turbo/
+.vercel/
+*.tgz

@@ -1,22 +1,38 @@
-# Board Observer - PostgreSQL Database
-# Isolated setup to avoid conflicts with other apps
-# Usage: docker compose up -d
+# ==================================
+# Board Observer - Database Only
+# For local development
+# ==================================
 #
-# Ports used by Board Observer (to avoid conflicts):
-#   - Frontend:  4280
-#   - Backend:   4281
-#   - Database:  5481
+# Usage:
+#   docker compose up -d     # Start PostgreSQL
+#   docker compose down      # Stop PostgreSQL
+#   docker compose logs -f   # View logs
+#
+# Connection:
+#   Host: localhost
+#   Port: 5481 (non-standard to avoid conflicts)
+#   User: postgres
+#   Password: postgres
+#   Database: board_observer
+#
+# Connection URL:
+#   postgresql://postgres:postgres@localhost:5481/board_observer
+#
+# ==================================
 
 services:
   db:
     image: postgres:15-alpine
     container_name: board-observer-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: board_observer
+      # Logging (optional)
+      # POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
-      - "5481:5432"  # External port 5481 to avoid conflicts
+      - "5481:5432"  # External: 5481, Internal: 5432
     volumes:
       - board_observer_postgres_data:/var/lib/postgresql/data
     healthcheck:

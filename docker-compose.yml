@@ -1,16 +1,29 @@
-# Board Observer - Full Stack Docker Compose
-# Usage: docker compose up -d
+# ==================================
+# Board Observer - Docker Compose
+# Full Stack Development Setup
+# ==================================
 #
-# Ports used by Board Observer (to avoid conflicts):
-#   - Frontend:  4280
-#   - Backend:   4281
-#   - Database:  5481
+# Usage:
+#   docker compose up -d          # Start all services
+#   docker compose down           # Stop all services
+#   docker compose logs -f        # View logs
+#   docker compose ps             # Check status
+#
+# Ports (non-standard to avoid conflicts):
+#   - Frontend:   4280 (default: 3000)
+#   - Backend:    4281 (default: 3001)
+#   - PostgreSQL: 5481 (default: 5432)
+#   - Redis:      6381 (default: 6379)
+#
+# ==================================
 
 services:
+  # ==================================
   # PostgreSQL Database
+  # ==================================
   db:
     image: postgres:15-alpine
-    container_name: board-observer-db
+    container_name: board-observer-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -19,7 +32,7 @@ services:
     ports:
       - "5481:5432"
     volumes:
-      - board_observer_data:/var/lib/postgresql/data
+      - board_observer_postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -28,7 +41,28 @@ services:
     networks:
       - board-observer-network
 
+  # ==================================
+  # Redis (Rate Limiting & Caching)
+  # ==================================
+  redis:
+    image: redis:7-alpine
+    container_name: board-observer-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - board_observer_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - board-observer-network
+
+  # ==================================
   # Backend API (Node.js/Express)
+  # ==================================
   backend:
     build:
       context: ./backend
@@ -36,25 +70,47 @@ services:
     container_name: board-observer-api
     restart: unless-stopped
     environment:
+      # Database
       DATABASE_URL: postgresql://postgres:postgres@db:5432/board_observer?schema=public
+      # Server
       PORT: 4281
       NODE_ENV: production
       FRONTEND_URL: http://localhost:4280
+      # Redis
+      REDIS_URL: redis://redis:6379
+      # AI Mode (set to false and add API keys for production)
       AI_MOCK_ENABLED: "true"
+      # Recall.ai (uncomment for production)
+      # RECALL_API_KEY: ${RECALL_API_KEY}
+      # RECALL_WEBHOOK_SECRET: ${RECALL_WEBHOOK_SECRET}
+      # RECALL_API_URL: https://us-west-2.recall.ai/api/v1
+      # WEBHOOK_BASE_URL: ${WEBHOOK_BASE_URL}
+      # OpenAI (uncomment for production)
+      # OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # OPENAI_MODEL: gpt-4o-mini
+      # ElevenLabs (uncomment for production)
+      # ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY}
+      # ELEVENLABS_VOICE_ID: nPczCjzI2devNBz1zQrb
+      # ELEVENLABS_MODEL: eleven_flash_v2_5
     ports:
       - "4281:4281"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4281/health"]
       interval: 30s
       timeout: 3s
+      start_period: 30s
       retries: 3
     networks:
       - board-observer-network
 
+  # ==================================
   # Frontend (Next.js)
+  # ==================================
   frontend:
     build:
       context: .
@@ -72,13 +128,28 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4280"]
+      interval: 30s
+      timeout: 3s
+      start_period: 30s
+      retries: 3
     networks:
       - board-observer-network
 
+# ==================================
+# Volumes
+# ==================================
 volumes:
-  board_observer_data:
-    driver: local
+  board_observer_postgres:
+    name: board_observer_postgres
+  board_observer_redis:
+    name: board_observer_redis
 
+# ==================================
+# Networks
+# ==================================
 networks:
   board-observer-network:
+    name: board-observer-net
     driver: bridge
